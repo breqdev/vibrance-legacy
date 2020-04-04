@@ -80,7 +80,7 @@ while True:
                         try:
                             obj = json.loads(line)
                             pushColorToClients(obj["port"], obj["color"], obj["delay"])
-                        except json.JSONDecodeError:
-                            print("Failed to deocde JSON")
+                        except json.JSONDecodeError as e:
+                            print("Failed to deocde JSON: "+str(e))
             except Exception as e:
                 print("Recv failed: "+str(e))

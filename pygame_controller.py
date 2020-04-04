@@ -1,5 +1,5 @@
 import pygame
-
+import time
 import controller
 
 ctrl = controller.Controller()
@@ -13,8 +13,12 @@ clock = pygame.time.Clock()
 color = "0F0"
 
 running = True
+
+frame = 0;
+
+changes = {}
+
 while running:
-    changes = {}
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -63,10 +67,13 @@ while running:
             elif event.key in (pygame.K_KP9, ord('9')):
                 changes[9003] = "000"
 
-    for port in changes.keys():
-        ctrl.setColor(port, changes[port])
-
+    if frame % 3 == 0:
+        for port in changes.keys():
+            ctrl.setColor(port, changes[port])
+        changes = {}
+        ctrl.write()
     pygame.display.flip()
+    frame += 1
     clock.tick(30)
 
 pygame.quit()
