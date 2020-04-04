@@ -4,14 +4,20 @@ import time
 
 ctrl = controller.Controller()
 
+def getColor(radians):
+    red = 0x80 + int(0x79*math.sin(radians))
+    green = 0x80 + int(0x79*math.sin(radians+math.pi*2/3))
+    blue = 0x80 + int(0x79*math.sin(radians+math.pi*4/3))
+    return f"{format(red, '02x')}{format(green, '02x')}{format(blue, '02x')}"
+
 frame = 0
 while True:
-    red = 0x80 + int(0x79*math.sin(frame/10))
-    green = 0x80 + int(0x79*math.sin(frame/10 + math.pi*2/3))
-    blue = 0x80 + int(0x79*math.sin(frame/10 + math.pi*4/3))
-    color = f"{format(red, '02x')}{format(green, '02x')}{format(blue, '02x')}"
-    for port in range(9001, 9007):
-        ctrl.setColor(port, color)
+    ctrl.setColor(9001, getColor(frame/5))
+    ctrl.setColor(9002, getColor(frame/5+math.pi*1/3))
+    ctrl.setColor(9003, getColor(frame/5+math.pi*2/3))
+    ctrl.setColor(9004, getColor(frame/5+math.pi))
+    ctrl.setColor(9005, getColor(frame/5+math.pi*4/3))
+    ctrl.setColor(9006, getColor(frame/5+math.pi*5/3))
     ctrl.write()
     frame += 1
-    time.sleep(0.1)
+    time.sleep(1)

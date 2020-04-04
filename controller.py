@@ -1,17 +1,13 @@
-import socket
+import requests
 import json
 
 class Controller:
     def __init__(self):
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.sock.connect(("cloud.itsw.es", 9000))
-        self.buffer = []
+        self.colors = {port: "000" for port in range(9001, 9007)}
 
-    def setColor(self, port, color, delay=0):
-        self.buffer.append((json.dumps({
-            "port":port, "color":color, "delay":delay
-            })+"\n").encode("utf-8"))
+    def setColor(self, port, color):
+        self.colors[port] = color
 
     def write(self):
-        self.sock.send(b"".join(self.buffer))
-        self.buffer = []
+        print(f"Sending JSON object {self.colors}")
+        requests.post("http://10.0.1.170:9100/", json=self.colors)

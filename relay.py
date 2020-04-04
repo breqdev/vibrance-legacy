@@ -1,88 +1,140 @@
 import socket
 import select
-import json
-import time
-import os
-import shutil
 import subprocess
+import atexit
+import time
+import json
+import threading
+from multiprocessing.dummy import Pool as ThreadPool
+from flask import Flask, request
 
-server_socks = {}
-clients = {}
+app = Flask(__name__)
 
-for port in range(9001, 9007):
+
+ports = list(range(9001, 9007))
+colors = {str(port): "000" for port in ports}
+servers = []
+port_of_server = {}
+clients = []
+port_of_client = {}
+lastMessage = {}
+websockify_procs = []
+
+for port in ports:
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     sock.bind(("0.0.0.0", port+100))
     sock.listen(16)
-    server_socks[port] = sock
-    clients[sock] = [sock]
+    servers.append(sock)
+    port_of_server[sock] = port
+
+def shutdownServerSocks():
+    for sock in servers:
+        sock.close()
+atexit.register(shutdownServerSocks)
+
+for port in ports:
     # Start the websockify
-    subprocess.Popen(["websockify", str(port), f"localhost:{port+100}"])
+    websockify_procs.append(subprocess.Popen(["websockify", str(port), f"localhost:{port+100}"]))
 
-# Input server
-input_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-input_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-input_sock.bind(("0.0.0.0", 9000))
-input_sock.listen(16)
-input_clients = [input_sock]
+def shutdownWebsockifys():
+    for proc in websockify_procs:
+        proc.terminate()
+atexit.register(shutdownWebsockifys)
 
-def pushColorToClients(port, color, delay):
-    print(f"Sending color {color} to clients on port {port} after {delay} sec")
-    global clients, server_socks
+# Dealing with clients
+def removeClient(client):
+    client.close()
+    clients.remove(client)
+    del lastMessage[client]
 
-    server_sock = server_socks[port]
+def handleIncomingLoop():
+    print("Starting handle incoming connections thread")
+    while True:
+        read_servers = select.select(servers, [], [], 0.1)[0]
+        for sock in read_servers:
+            # New client
+            port = port_of_server[sock]
+            new_client, addr = sock.accept()
+            clients.append(new_client)
+            port_of_client[new_client] = port
+            lastMessage[new_client] = time.time()
+            print(f"New client from {addr} on port {port}")
 
-    changeTime = time.time() + delay
-
-    for client in clients[server_sock]:
-        if client is not server_sock:
-            clientSpecificDelay = (changeTime - time.time()) * 1000
-            try:
-                print("Sending to client...")
-                client.send(json.dumps(["#"+color, clientSpecificDelay]).encode("utf8"))
-            except Exception as e:
-                print("Failed to send to client", e)
-                client.close()
-                clients[server_sock].remove(client)
-
-
-while True:
-    # Handle output servers
-    for port, server_sock in server_socks.items():
-        read_sockets = select.select(clients[server_sock], [], [], 0)[0]
-
-        for sock in read_sockets:
-            if sock is server_sock:
-                # New client connected
-                new_client, addr = server_sock.accept()
-                clients[server_sock].append(new_client)
-                print(f"New client on port {port}")
-            else:
-                # Message from existing client
-                # Ignore
-                pass
-
-    # Handle input servers
-    read_sockets = select.select(input_clients, [], [], 0)[0]
-    for sock in read_sockets:
-        if sock is input_sock:
-            # New input client
-            new_client, addr = input_sock.accept()
-            input_clients.append(new_client)
-            print(f"New input client from {addr}")
-        else:
-            # New message from input client
+def handleAcknowledgeLoop():
+    print("Starting handle acknowledge thread")
+    while True:
+        read_clients = select.select(clients, [], [], 0.1)[0]
+        for sock in read_clients:
+            # New message from client
             try:
                 data = sock.recv(1024)
                 if data:
                     message = data.decode()
-                    print(f"Received {message} from input client")
-                    for line in message.split("\n"):
-                        if not line:
-                            continue
-                        try:
-                            obj = json.loads(line)
-                            pushColorToClients(obj["port"], obj["color"], obj["delay"])
-                        except json.JSONDecodeError as e:
-                            print("Failed to deocde JSON: "+str(e))
+                    print(f"Received {message} from {sock.getpeername()}")
+                    lastMessage[sock] = time.time()
             except Exception as e:
-                print("Recv failed: "+str(e))
+                print(f"Failure reading message from {sock.getpeername()}:", e)
+
+def handleCheckAliveLoop():
+    print("Starting handle check alive thread")
+    while True:
+        for client in clients:
+            if time.time() - lastMessage[client] > 10:
+                removeClient(client)
+                try:
+                    print(f"Terminating dead client {client.getpeername()}")
+                except:
+                    print("Terminating dead client")
+        time.sleep(10)
+
+def wrapLoop(loopfunc):
+    def wrapped():
+        while True:
+            try:
+                loopfunc()
+            except BaseException as e:
+                print(f"Exception in thread {loopfunc}", e)
+            else:
+                print(f"Thread {loopfunc} exited, restarting")
+    return wrapped
+
+def runBackgroundProcesses():
+    handleIncomingProcess = threading.Thread(target=wrapLoop(handleIncomingLoop))
+    handleAcknowledgeProcess = threading.Thread(target=wrapLoop(handleAcknowledgeLoop))
+    handleCheckAliveProcess = threading.Thread(target=wrapLoop(handleCheckAliveLoop))
+
+    handleIncomingProcess.start()
+    handleAcknowledgeProcess.start()
+    handleCheckAliveProcess.start()
+
+
+def broadcastToClient(client):
+    port = port_of_client[client]
+    try:
+        print(f"Sending to client {client.getpeername()} in port {port}")
+        client.send(json.dumps(["#"+colors[str(port)], 0]).encode("utf-8"))
+    except Exception as e:
+        print("Failed:", e, "terminating client")
+        removeClient(client)
+
+def broadcastToClients():
+    pool = ThreadPool(16)
+    pool.map(broadcastToClient, clients)
+    pool.close()
+    pool.join()
+
+@app.route("/", methods=["GET", "POST"])
+def index():
+    global colors
+    if request.method == "GET":
+        return "Relay"
+    elif request.method == "POST":
+        colors = request.json
+        for client in clients:
+            broadcastToClient(client)
+        return "OK"
+
+runBackgroundProcesses()
+
+app.run(host="0.0.0.0", port=9100)
