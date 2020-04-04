@@ -74,12 +74,12 @@ while True:
                 data = sock.recv(1024)
                 if data:
                     message = data.decode()
-                    print("Received {message} from input client")
+                    print(f"Received {message} from input client")
                     for line in message.partition("\n"):
                         try:
                             obj = json.loads(line)
                             pushColorToClients(obj["port"], obj["color"], obj["delay"])
-                        except JSONDecodeError:
+                        except json.JSONDecodeError:
                             print("Failed to deocde JSON")
             except Exception as e:
                 print("Recv failed: "+str(e))
