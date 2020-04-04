@@ -76,7 +76,9 @@ while True:
                 if data:
                     message = data.decode()
                     print(f"Received {message} from input client")
-                    for line in message.partition("\n"):
+                    for line in message.split("\n"):
+                        if not line:
+                            continue
                         try:
                             obj = json.loads(line)
                             pushColorToClients(obj["port"], obj["color"], obj["delay"])
