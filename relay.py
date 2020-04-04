@@ -20,6 +20,7 @@ for port in range(9001, 9007):
 
 # Input server
 input_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+input_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 input_sock.bind(("0.0.0.0", 9000))
 input_sock.listen(16)
 input_clients = [input_sock]
