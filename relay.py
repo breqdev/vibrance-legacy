@@ -75,7 +75,11 @@ while True:
                 if data:
                     message = data.decode()
                     print("Received {message} from input client")
-                    obj = json.loads(message)
-                    pushColorToClients(obj["port"], obj["color"], obj["delay"])
+                    for line in message.partition("\n"):
+                        try:
+                            obj = json.loads(line)
+                            pushColorToClients(obj["port"], obj["color"], obj["delay"])
+                        except JSONDecodeError:
+                            print("Failed to deocde JSON")
             except Exception as e:
-                print("Recv failed: "+e)
+                print("Recv failed: "+str(e))
