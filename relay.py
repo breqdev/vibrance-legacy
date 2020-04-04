@@ -71,7 +71,7 @@ def handleAcknowledgeLoop():
                 data = sock.recv(1024)
                 if data:
                     message = data.decode()
-                    print(f"Received {message} from {sock.getpeername()}")
+                    # print(f"Received {message} from {sock.getpeername()}")
                     lastMessage[sock] = time.time()
             except Exception as e:
                 print(f"Failure reading message from {sock.getpeername()}:", e)
@@ -112,17 +112,19 @@ def runBackgroundProcesses():
 def broadcastToClient(client):
     port = port_of_client[client]
     try:
-        print(f"Sending to client {client.getpeername()} in port {port}")
+        #print(f"Sending to client {client.getpeername()} in port {port}")
         client.send(json.dumps(["#"+colors[str(port)], 0]).encode("utf-8"))
     except Exception as e:
-        print("Failed:", e, "terminating client")
+        print(f"Failed send to {port} client:", e, "terminating client")
         removeClient(client)
 
 def broadcastToClients():
+    print("Broadcasting update...")
     pool = ThreadPool(16)
     pool.map(broadcastToClient, clients)
     pool.close()
     pool.join()
+    print(f"Broadcast update to {len(clients)} clients")
 
 @app.route("/", methods=["GET", "POST"])
 def index():

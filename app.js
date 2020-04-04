@@ -2,7 +2,7 @@ var port = location.hash.substring(1);
 
 
 function runApp() {
-    var socket = new WebSocket("ws://10.0.1.170:"+port, "binary");
+    var socket = new WebSocket("ws://cloud.itsw.es:"+port, "binary");
     socket.binaryType = "arraybuffer";
 
     socket.onopen = function(event) {
