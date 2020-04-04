@@ -10,7 +10,7 @@ colorvars = {}
 buttons = {}
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-sock.connect(("10.0.1.170", 9000))
+sock.connect(("cloud.itsw.es", 9000))
 
 def sendColor(port):
     sock.send(json.dumps({"port":port, "color":colorvars[port].get(), "delay":0}).encode("utf-8"))
