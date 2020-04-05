@@ -14,5 +14,4 @@ class Controller:
         self.colors[port] = color
 
     def write(self):
-        print(f"Sending JSON object {self.colors}")
         requests.post(self.relay, json=self.colors, auth=self.auth)

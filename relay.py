@@ -154,8 +154,7 @@ def index():
         return "Relay"
     elif request.method == "POST":
         colors = request.json
-        for client in clients:
-            broadcastToClient(client)
+        broadcastToClients()
         return "OK"
 
 runBackgroundProcesses()
