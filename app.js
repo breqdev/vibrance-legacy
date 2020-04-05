@@ -31,7 +31,7 @@ function runApp() {
         socket = null;
         document.getElementById("screen").style.backgroundColor = "#000";
         document.getElementById("status").innerText = "Reconnecting";
-        setTimeout(runApp, 500);
+        setTimeout(runApp, 1000); // Try again in 1s
     }
 }
 

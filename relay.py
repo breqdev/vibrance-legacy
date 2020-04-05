@@ -8,9 +8,16 @@ import threading
 import traceback
 from multiprocessing.dummy import Pool as ThreadPool
 from flask import Flask, request
+from flask_basicauth import BasicAuth
 
 app = Flask(__name__)
+auth = BasicAuth(app)
 
+app.config['BASIC_AUTH_USERNAME'] = "breq"
+app.config['BASIC_AUTH_PASSWORD'] = "password"
+
+cert = "../certs/fullchain.pem"
+key  = "../certs/privkey.pem"
 
 ports = list(range(9001, 9007))
 colors = {str(port): "000" for port in ports}
@@ -35,8 +42,8 @@ for port in ports:
     # Start the websockify
     websockify_procs.append(subprocess.Popen(["websockify", str(port),
                                               f"localhost:{port+100}",
-                                              "--cert=../certs/fullchain.pem",
-                                              "--key=../certs/privkey.pem"]))
+                                              f"--cert={cert}",
+                                              f"--key={key}"]))
 
 def shutdownWebsockifys():
     for proc in websockify_procs:
@@ -140,6 +147,7 @@ def broadcastToClients():
     print(f"Broadcast update to {len(clients)} clients")
 
 @app.route("/", methods=["GET", "POST"])
+@auth.required
 def index():
     global colors
     if request.method == "GET":
@@ -152,4 +160,4 @@ def index():
 
 runBackgroundProcesses()
 
-app.run(host="0.0.0.0", port=9100)
+app.run(host="0.0.0.0", port=9100, ssl_context=(cert, key))
