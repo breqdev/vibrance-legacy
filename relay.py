@@ -129,20 +129,18 @@ def runBackgroundProcesses():
 
 
 def broadcastToClient(client):
+    global colors
     port = client.getsockname()[1]-100
     try:
-        #print(f"Sending to client {client.getpeername()} in port {port}")
         client.send(json.dumps(["#"+colors[str(port)], 0]).encode("utf-8"))
     except Exception as e:
-        print(f"Failed send to {port} client; terminating client")
+        print(f"Failed send to {port} client")
         traceback.print_exc()
-        removeClient(client)
 
 def broadcastToClients():
-    print("Broadcasting update...")
     ts = time.time()
-    pool = ThreadPool(1)
-    pool.map(broadcastToClient, clients)
+    pool = ThreadPool(4)
+    pool.imap_unordered(broadcastToClient, clients)
     pool.close()
     pool.join()
     print(f"Broadcast update to {len(clients)} clients in {int((time.time()-ts)*1000)} ms")
