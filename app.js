@@ -2,11 +2,11 @@ var port = location.hash.substring(1);
 
 
 function runApp() {
-    var socket = new WebSocket("ws://cloud.itsw.es:"+port, "binary");
+    var socket = new WebSocket("ws://10.0.1.170:"+port, "binary");
     socket.binaryType = "arraybuffer";
 
     socket.onopen = function(event) {
-        document.getElementById("status").innerText = "Connected";
+        document.getElementById("status").innerText = port+" OK";
 
         function sendAcknowledges() {
             if (socket) {
@@ -18,7 +18,7 @@ function runApp() {
     }
 
     socket.onmessage = function(event) {
-        console.log(event.data)
+        //console.log(event.data)
         var decodedString = String.fromCharCode.apply(null, new Uint8Array(event.data));
         var message = JSON.parse(decodedString);
         setTimeout(function(color) {
@@ -29,7 +29,7 @@ function runApp() {
     socket.onclose = function(event) {
         socket = null;
         document.getElementById("screen").style.backgroundColor = "#000";
-        document.getElementById("status").innerText = "Reconnecting...";
+        document.getElementById("status").innerText = "RECONN";
         setTimeout(runApp, 500);
     }
 }

@@ -5,6 +5,7 @@ import atexit
 import time
 import json
 import threading
+import traceback
 from multiprocessing.dummy import Pool as ThreadPool
 from flask import Flask, request
 
@@ -14,9 +15,7 @@ app = Flask(__name__)
 ports = list(range(9001, 9007))
 colors = {str(port): "000" for port in ports}
 servers = []
-port_of_server = {}
 clients = []
-port_of_client = {}
 lastMessage = {}
 websockify_procs = []
 
@@ -26,7 +25,6 @@ for port in ports:
     sock.bind(("0.0.0.0", port+100))
     sock.listen(16)
     servers.append(sock)
-    port_of_server[sock] = port
 
 def shutdownServerSocks():
     for sock in servers:
@@ -45,19 +43,24 @@ atexit.register(shutdownWebsockifys)
 # Dealing with clients
 def removeClient(client):
     client.close()
-    clients.remove(client)
-    del lastMessage[client]
+    try:
+        clients.remove(client)
+    except ValueError:
+        pass
+    try:
+        del lastMessage[client]
+    except ValueError:
+        pass
 
 def handleIncomingLoop():
     print("Starting handle incoming connections thread")
     while True:
-        read_servers = select.select(servers, [], [], 0.1)[0]
+        read_servers = select.select(servers, [], [], 0)[0]
         for sock in read_servers:
             # New client
-            port = port_of_server[sock]
+            port = sock.getsockname()[1]-100
             new_client, addr = sock.accept()
             clients.append(new_client)
-            port_of_client[new_client] = port
             lastMessage[new_client] = time.time()
             print(f"New client from {addr} on port {port}")
 
@@ -74,7 +77,9 @@ def handleAcknowledgeLoop():
                     # print(f"Received {message} from {sock.getpeername()}")
                     lastMessage[sock] = time.time()
             except Exception as e:
-                print(f"Failure reading message from {sock.getpeername()}:", e)
+                print("Error receiving message, terminating client")
+                traceback.print_exc()
+                removeClient(sock)
 
 def handleCheckAliveLoop():
     print("Starting handle check alive thread")
@@ -94,7 +99,8 @@ def wrapLoop(loopfunc):
             try:
                 loopfunc()
             except BaseException as e:
-                print(f"Exception in thread {loopfunc}", e)
+                print(f"Exception in thread {loopfunc}")
+                traceback.print_exc()
             else:
                 print(f"Thread {loopfunc} exited, restarting")
     return wrapped
@@ -110,17 +116,18 @@ def runBackgroundProcesses():
 
 
 def broadcastToClient(client):
-    port = port_of_client[client]
+    port = client.getsockname()[1]-100
     try:
         #print(f"Sending to client {client.getpeername()} in port {port}")
         client.send(json.dumps(["#"+colors[str(port)], 0]).encode("utf-8"))
     except Exception as e:
-        print(f"Failed send to {port} client:", e, "terminating client")
+        print(f"Failed send to {port} client; terminating client")
+        traceback.print_exc()
         removeClient(client)
 
 def broadcastToClients():
     print("Broadcasting update...")
-    pool = ThreadPool(16)
+    pool = ThreadPool(32)
     pool.map(broadcastToClient, clients)
     pool.close()
     pool.join()
