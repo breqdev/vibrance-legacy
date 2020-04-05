@@ -33,7 +33,10 @@ atexit.register(shutdownServerSocks)
 
 for port in ports:
     # Start the websockify
-    websockify_procs.append(subprocess.Popen(["websockify", str(port), f"localhost:{port+100}"]))
+    websockify_procs.append(subprocess.Popen(["websockify", str(port),
+                                              f"localhost:{port+100}",
+                                              "--cert=../certs/fullchain.pem",
+                                              "--key=../certs/privkey.pem"]))
 
 def shutdownWebsockifys():
     for proc in websockify_procs:
@@ -106,9 +109,12 @@ def wrapLoop(loopfunc):
     return wrapped
 
 def runBackgroundProcesses():
-    handleIncomingProcess = threading.Thread(target=wrapLoop(handleIncomingLoop))
-    handleAcknowledgeProcess = threading.Thread(target=wrapLoop(handleAcknowledgeLoop))
-    handleCheckAliveProcess = threading.Thread(target=wrapLoop(handleCheckAliveLoop))
+    handleIncomingProcess = threading.Thread(
+                                        target=wrapLoop(handleIncomingLoop))
+    handleAcknowledgeProcess = threading.Thread(
+                                        target=wrapLoop(handleAcknowledgeLoop))
+    handleCheckAliveProcess = threading.Thread(
+                                        target=wrapLoop(handleCheckAliveLoop))
 
     handleIncomingProcess.start()
     handleAcknowledgeProcess.start()

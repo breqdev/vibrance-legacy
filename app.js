@@ -2,7 +2,7 @@ var port = location.hash.substring(1);
 
 
 function runApp() {
-    var socket = new WebSocket("ws://cloud.itsw.es:"+port, "binary");
+    var socket = new WebSocket("wss://cloud.itsw.es:"+port, "binary");
     socket.binaryType = "arraybuffer";
 
     socket.onopen = function(event) {
@@ -19,7 +19,8 @@ function runApp() {
 
     socket.onmessage = function(event) {
         //console.log(event.data)
-        var decodedString = String.fromCharCode.apply(null, new Uint8Array(event.data));
+        var decodedString = String.fromCharCode.apply(null,
+                                                new Uint8Array(event.data));
         var message = JSON.parse(decodedString);
         setTimeout(function(color) {
             document.getElementById("screen").style.backgroundColor = color;
