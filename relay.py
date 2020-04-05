@@ -140,11 +140,12 @@ def broadcastToClient(client):
 
 def broadcastToClients():
     print("Broadcasting update...")
-    pool = ThreadPool(4)
+    ts = time.time()
+    pool = ThreadPool(1)
     pool.map(broadcastToClient, clients)
     pool.close()
     pool.join()
-    print(f"Broadcast update to {len(clients)} clients")
+    print(f"Broadcast update to {len(clients)} clients in {int((time.time()-ts)*1000)} ms")
 
 @app.route("/", methods=["GET", "POST"])
 @auth.required
