@@ -140,7 +140,7 @@ def broadcastToClient(client):
 
 def broadcastToClients():
     print("Broadcasting update...")
-    pool = ThreadPool(32)
+    pool = ThreadPool(4)
     pool.map(broadcastToClient, clients)
     pool.close()
     pool.join()
