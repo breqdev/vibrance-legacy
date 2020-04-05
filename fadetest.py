@@ -19,7 +19,8 @@ while True:
     ctrl.setColor(9005, getColor(frame/2+math.pi*4/3))
     ctrl.setColor(9006, getColor(frame/2+math.pi*5/3))
     ts = time.time()
+    print("Sending update... ")
     ctrl.write()
-    print(f"Sent update in {int((time.time()-ts)*1000)} ms")
+    print(f"{int((time.time()-ts)*1000)} ms")
     frame += 1
-    time.sleep(1)
+    time.sleep(1 + ts - time.time())

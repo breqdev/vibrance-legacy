@@ -9,9 +9,10 @@ class Controller:
             self.auth = (username, password)
         else:
             self.auth = None
+        self.session = requests.Session()
 
     def setColor(self, port, color):
         self.colors[port] = color
 
     def write(self):
-        requests.post(self.relay, json=self.colors, auth=self.auth)
+        self.session.post(self.relay, json=self.colors, auth=self.auth)
