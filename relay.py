@@ -6,6 +6,7 @@ import time
 import json
 import threading
 import traceback
+import ssl
 from multiprocessing.dummy import Pool as ThreadPool
 
 cert = "../certs/fullchain.pem"
@@ -140,9 +141,17 @@ def broadcastToClients():
     print(f"Broadcast update to {len(clients)} clients in {int((time.time()-ts)*1000)} ms")
 
 ### Command Server
-cserver_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-cserver_sock.bind(("0.0.0.0", 9100))
-cserver_sock.listen(16)
+if enable_ssl:
+    context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+    context.load_cert_chain(cert, key)
+    cserver_sock_unwrapped = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    cserver_sock_unwrapped.bind(("0.0.0.0", 9100))
+    cserver_sock_unwrapped.listen(16)
+    cserver_sock = context.wrap_socket(cserver_sock_unwrapped, server_side=True)
+else:
+    cserver_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    cserver_sock.bind(("0.0.0.0", 9100))
+    cserver_sock.listen(16)
 
 cclients = []
 
