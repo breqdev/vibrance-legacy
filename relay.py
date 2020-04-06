@@ -155,16 +155,60 @@ else:
     cserver_sock.listen(16)
 
 cclients = []
+cclients_awaiting_auth = []
+
+PASSWORD = "password"
 
 def runCServer():
     global colors
     while True:
+        # New Clients
         read_server = select.select([cserver_sock], [], [], 0)[0]
         if cserver_sock in read_server:
-            # New Command Client
             new_client, addr = cserver_sock.accept()
-            cclients.append(new_client)
-            print(f"New command client from {addr}")
+            cclients_awaiting_auth.append(new_client)
+            print(f"New command client from {addr} awaiting authentication")
+
+        # Client Authentication
+        read_clients_awaiting = select.select(cclients_awaiting_auth, [], [], 0)[0]
+        for client in read_clients_awaiting:
+            print("New data from client awaiting auth")
+            try:
+                data = client.recv(1024)
+                if not data:
+                    print("Socket closed")
+                    cclients_awaiting_auth.remove(client)
+                    try:
+                        client.close()
+                    except Exception:
+                        pass
+            except Exception as e:
+                print("Error reading")
+                traceback.print_exc()
+                cclients_awaiting_auth.remove(client)
+                try:
+                    client.close()
+                except Exception:
+                    pass
+            try:
+                message = data.decode()
+            except Exception:
+                print("Unable to decode message")
+            else:
+                if message == PASSWORD:
+                    print("Client authenticated")
+                    cclients.append(client)
+                    cclients_awaiting_auth.remove(client)
+                    client.send(b"OK")
+                else:
+                    print("Authentication failed")
+                    cclients_awaiting_auth.remove(client)
+                    try:
+                        client.close()
+                    except Exception:
+                        pass
+
+        # Authenticated Clients
         read_clients = select.select(cclients, [], [], 0)[0]
         for client in read_clients:
             print("New data")

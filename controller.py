@@ -3,7 +3,7 @@ import json
 import ssl
 
 class Controller:
-    def __init__(self, relay, enable_ssl=True):
+    def __init__(self, relay, password=None, enable_ssl=True):
         self.colors = {port: "000" for port in range(9001, 9007)}
         self.relay = relay
         if enable_ssl:
@@ -14,6 +14,13 @@ class Controller:
         else:
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.connect((relay, 9100))
+        if password:
+            self.socket.send(password.encode("utf-8"))
+            ret = self.socket.recv(1024).decode("utf-8")
+            if ret == b"OK":
+                return
+            else:
+                raise ValueError, "authentication failed"
 
     def setColor(self, port, color):
         self.colors[port] = color
