@@ -160,6 +160,8 @@ def runCServer():
             print("New data")
             try:
                 data = client.recv(1024)
+                if not data:
+                    continue
             except Exception as e:
                 print("Error reading from command client, removing")
                 traceback.print_exc()
