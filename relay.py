@@ -126,7 +126,7 @@ def runBackgroundProcesses():
     handleAcknowledgeProcess.start()
     handleCheckAliveProcess.start()
 
-broadcastPool = ThreadPool(4)
+broadcastPool = ThreadPool(8)
 
 def closePool(): # due to AIDS
     broadcastPool.close()
@@ -145,7 +145,7 @@ def broadcastToClient(client):
 
 def broadcastToClients():
     ts = time.time()
-    broadcastPool.imap_unordered(broadcastToClient, clients)
+    broadcastPool.map(broadcastToClient, clients)
     print(f"Broadcast update to {len(clients)} clients in {int((time.time()-ts)*1000)} ms")
 
 @app.route("/", methods=["GET", "POST"])
