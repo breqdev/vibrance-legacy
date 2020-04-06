@@ -179,6 +179,7 @@ def runCServer():
             else:
                 print(colors)
                 broadcastToClients()
+                client.send(b"OK")
 
 
 
