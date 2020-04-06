@@ -8,7 +8,7 @@ class Controller:
         self.relay = relay
         if enable_ssl:
             self.context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
-            self.context.load_verify_locations(capath="/usr/share/ca-certificates/mozilla")
+            self.context.load_default_certs()
             unwrapped_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.socket = self.context.wrap_socket(unwrapped_socket, server_hostname=relay)
         else:
