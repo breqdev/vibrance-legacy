@@ -20,7 +20,7 @@ class Controller:
             if ret == b"OK":
                 return
             else:
-                raise ValueError, "authentication failed"
+                raise ValueError("authentication failed")
 
     def setColor(self, port, color):
         self.colors[port] = color

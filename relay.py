@@ -221,6 +221,7 @@ def runCServer():
                         client.close()
                     except Exception:
                         pass
+                    continue
             except Exception as e:
                 print("Error reading from command client, removing")
                 traceback.print_exc()
