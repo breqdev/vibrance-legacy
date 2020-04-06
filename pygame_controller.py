@@ -2,7 +2,7 @@ import pygame
 import time
 import controller
 
-ctrl = controller.Controller()
+ctrl = controller.Controller("cloud.itsw.es", "password")
 
 pygame.init()
 
@@ -45,7 +45,13 @@ while running:
             elif event.key in (pygame.K_KP9, ord('9')):
                 colors[9003] = color
             elif event.key in (pygame.K_KP0, ord('0')):
-                updateNeeded = True
+                colors[9001] = color
+                colors[9002] = color
+                colors[9003] = color
+                colors[9004] = color
+                colors[9005] = color
+                colors[9006] = color
+            updateNeeded = True
         elif event.type == pygame.KEYUP:
             if event.key in (pygame.K_KP1, ord('1')):
                 colors[9001] = "000"
@@ -68,6 +74,14 @@ while running:
                 colors[9002] = "000"
             elif event.key in (pygame.K_KP9, ord('9')):
                 colors[9003] = "000"
+            elif event.key in (pygame.K_KP0, ord('0')):
+                colors[9001] = "000"
+                colors[9002] = "000"
+                colors[9003] = "000"
+                colors[9004] = "000"
+                colors[9005] = "000"
+                colors[9006] = "000"
+            updateNeeded = True
 
     if updateNeeded:
         for port in colors.keys():
