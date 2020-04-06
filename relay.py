@@ -19,6 +19,8 @@ app.config['BASIC_AUTH_PASSWORD'] = "password"
 cert = "../certs/fullchain.pem"
 key  = "../certs/privkey.pem"
 
+enable_ssl = False
+
 ports = list(range(9001, 9007))
 colors = {str(port): "000" for port in ports}
 servers = []
@@ -35,10 +37,14 @@ for port in ports:
 
 for port in ports:
     # Start the websockify
-    websockify_procs.append(subprocess.Popen(["websockify", str(port),
-                                              f"localhost:{port+100}",
-                                              f"--cert={cert}",
-                                              f"--key={key}"]))
+    if enable_ssl:
+        websockify_procs.append(subprocess.Popen(["websockify", str(port),
+                                                  f"localhost:{port+100}",
+                                                  f"--cert={cert}",
+                                                  f"--key={key}"]))
+    else:
+        websockify_procs.append(subprocess.Popen(["websockify", str(port),
+                                                  f"localhost:{port+100}"]))
 
 def shutdownWebsockifys():
     for proc in websockify_procs:
@@ -154,4 +160,7 @@ def index():
 
 runBackgroundProcesses()
 
-app.run(host="0.0.0.0", port=9100, ssl_context=(cert, key))
+if enable_ssl:
+    app.run(host="0.0.0.0", port=9100, ssl_context=(cert, key))
+else:
+    app.run(host="0.0.0.0", port=9100)
