@@ -77,7 +77,10 @@ def handleIncomingLoop():
 def handleAcknowledgeLoop():
     print("Starting handle acknowledge thread")
     while True:
-        read_clients = select.select(clients, [], [], 0)[0]
+        try:
+            read_clients = select.select(clients, [], [], 0)[0]
+        except ValueError:
+            continue
         for sock in read_clients:
             # New message from client
             try:
