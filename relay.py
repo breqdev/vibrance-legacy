@@ -11,7 +11,7 @@ from multiprocessing.dummy import Pool as ThreadPool
 cert = "../certs/fullchain.pem"
 key  = "../certs/privkey.pem"
 
-enable_ssl = False
+enable_ssl = True
 
 ports = list(range(9001, 9007))
 colors = {str(port): "000" for port in ports}
