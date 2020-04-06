@@ -2,7 +2,7 @@ import controller
 import math
 import time
 
-ctrl = controller.Controller("https://cloud.itsw.es:9100/", "breq", "password")
+ctrl = controller.Controller("cloud.itsw.es")
 
 def getColor(radians):
     red = 0x80 + int(0x79*math.sin(radians))

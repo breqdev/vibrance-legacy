@@ -7,17 +7,11 @@ import json
 import threading
 import traceback
 from multiprocessing.dummy import Pool as ThreadPool
-from flask import Flask, request
-from flask_basicauth import BasicAuth
-
-app = Flask(__name__)
-auth = BasicAuth(app)
-
-app.config['BASIC_AUTH_USERNAME'] = "breq"
-app.config['BASIC_AUTH_PASSWORD'] = "password"
 
 cert = "../certs/fullchain.pem"
 key  = "../certs/privkey.pem"
+
+enable_ssl = True
 
 ports = list(range(9001, 9007))
 colors = {str(port): "000" for port in ports}
@@ -35,10 +29,14 @@ for port in ports:
 
 for port in ports:
     # Start the websockify
-    websockify_procs.append(subprocess.Popen(["websockify", str(port),
-                                              f"localhost:{port+100}",
-                                              f"--cert={cert}",
-                                              f"--key={key}"]))
+    if enable_ssl:
+        websockify_procs.append(subprocess.Popen(["websockify", str(port),
+                                                  f"localhost:{port+100}",
+                                                  f"--cert={cert}",
+                                                  f"--key={key}"]))
+    else:
+        websockify_procs.append(subprocess.Popen(["websockify", str(port),
+                                                  f"localhost:{port+100}"]))
 
 def shutdownWebsockifys():
     for proc in websockify_procs:
@@ -141,17 +139,52 @@ def broadcastToClients():
     broadcastPool.map(broadcastToClient, clients)
     print(f"Broadcast update to {len(clients)} clients in {int((time.time()-ts)*1000)} ms")
 
-@app.route("/", methods=["GET", "POST"])
-@auth.required
-def index():
+### Command Server
+cserver_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+cserver_sock.bind(("0.0.0.0", 9100))
+cserver_sock.listen(16)
+
+cclients = []
+
+def runCServer():
     global colors
-    if request.method == "GET":
-        return "Relay"
-    elif request.method == "POST":
-        colors = request.json
-        broadcastToClients()
-        return "OK"
+    while True:
+        read_server = select.select([cserver_sock], [], [], 0)[0]
+        if cserver_sock in read_server:
+            # New Command Client
+            new_client, addr = cserver_sock.accept()
+            cclients.append(new_client)
+            print(f"New command client from {addr}")
+        read_clients = select.select(cclients, [], [], 0)[0]
+        for client in read_clients:
+            print("New data")
+            try:
+                data = client.recv(1024)
+            except Exception as e:
+                print("Error reading from command client, removing")
+                traceback.print_exc()
+                cclients.remove(client)
+                try:
+                    client.close()
+                except Exception:
+                    pass
+            try:
+                line = data.decode().split("\n")[0]
+                colors = json.loads(line)
+            except Exception as e:
+                print("Unable to decode message")
+                traceback.print_exc()
+            else:
+                print(colors)
+                broadcastToClients()
+
+
 
 runBackgroundProcesses()
 
-app.run(host="0.0.0.0", port=9100, ssl_context=(cert, key))
+while True:
+    try:
+        runCServer()
+    except Exception as e:
+        print("Error in Command Server:")
+        traceback.print_exc()
