@@ -175,13 +175,14 @@ def runCServer():
             print("New data from client awaiting auth")
             try:
                 data = client.recv(1024)
-                if not data:
+                if len(data) == 0:
                     print("Socket closed")
                     cclients_awaiting_auth.remove(client)
                     try:
                         client.close()
                     except Exception:
                         pass
+                    continue
             except Exception as e:
                 print("Error reading")
                 traceback.print_exc()
@@ -190,6 +191,7 @@ def runCServer():
                     client.close()
                 except Exception:
                     pass
+                continue
             try:
                 message = data.decode()
             except Exception:
@@ -214,13 +216,13 @@ def runCServer():
             print("New data")
             try:
                 data = client.recv(1024)
-                if not data:
+                if len(data) == 0:
                     print("Socket closed")
-                    cclients.remove(client)
-                    try:
-                        client.close()
-                    except Exception:
-                        pass
+                    #cclients.remove(client)
+                    #try:
+                    #    client.close()
+                    #except Exception:
+                    #    pass
                     continue
             except Exception as e:
                 print("Error reading from command client, removing")
@@ -230,6 +232,7 @@ def runCServer():
                     client.close()
                 except Exception:
                     pass
+                continue
             try:
                 line = data.decode().split("\n")[0]
                 colors = json.loads(line)
