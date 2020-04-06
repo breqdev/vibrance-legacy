@@ -77,13 +77,12 @@ def handleIncomingLoop():
 def handleAcknowledgeLoop():
     print("Starting handle acknowledge thread")
     while True:
-        read_clients = select.select(clients, [], [], 0.1)[0]
+        read_clients = select.select(clients, [], [], 0)[0]
         for sock in read_clients:
             # New message from client
             try:
                 data = sock.recv(1024)
                 if data:
-                    message = data.decode()
                     # print(f"Received {message} from {sock.getpeername()}")
                     lastMessage[sock] = time.time()
             except Exception as e:
@@ -127,6 +126,12 @@ def runBackgroundProcesses():
     handleAcknowledgeProcess.start()
     handleCheckAliveProcess.start()
 
+broadcastPool = ThreadPool(4)
+
+def closePool(): # due to AIDS
+    broadcastPool.close()
+    broadcastPool.join()
+atexit.register(closePool)
 
 def broadcastToClient(client):
     global colors
@@ -136,13 +141,11 @@ def broadcastToClient(client):
     except Exception as e:
         print(f"Failed send to {port} client")
         traceback.print_exc()
+        removeClient(client)
 
 def broadcastToClients():
     ts = time.time()
-    pool = ThreadPool(4)
-    pool.imap_unordered(broadcastToClient, clients)
-    pool.close()
-    pool.join()
+    broadcastPool.imap_unordered(broadcastToClient, clients)
     print(f"Broadcast update to {len(clients)} clients in {int((time.time()-ts)*1000)} ms")
 
 @app.route("/", methods=["GET", "POST"])
