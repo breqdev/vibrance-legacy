@@ -16,7 +16,7 @@ class Controller:
         self.socket.connect((relay, 9100))
         if password:
             self.socket.send(password.encode("utf-8"))
-            ret = self.socket.recv(1024).decode("utf-8")
+            ret = self.socket.recv(1024)
             if ret == b"OK":
                 return
             else:

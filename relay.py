@@ -218,11 +218,11 @@ def runCServer():
                 data = client.recv(1024)
                 if len(data) == 0:
                     print("Socket closed")
-                    #cclients.remove(client)
-                    #try:
-                    #    client.close()
-                    #except Exception:
-                    #    pass
+                    cclients.remove(client)
+                    try:
+                        client.close()
+                    except Exception:
+                        pass
                     continue
             except Exception as e:
                 print("Error reading from command client, removing")
