@@ -33,11 +33,6 @@ for port in ports:
     sock.listen(16)
     servers.append(sock)
 
-def shutdownServerSocks():
-    for sock in servers:
-        sock.close()
-atexit.register(shutdownServerSocks)
-
 for port in ports:
     # Start the websockify
     websockify_procs.append(subprocess.Popen(["websockify", str(port),
@@ -59,7 +54,7 @@ def removeClient(client):
         pass
     try:
         del lastMessage[client]
-    except ValueError:
+    except KeyError:
         pass
 
 def handleIncomingLoop():
@@ -129,12 +124,7 @@ def runBackgroundProcesses():
     handleAcknowledgeProcess.start()
     handleCheckAliveProcess.start()
 
-broadcastPool = ThreadPool(8)
-
-def closePool(): # due to AIDS
-    broadcastPool.close()
-    broadcastPool.join()
-atexit.register(closePool)
+broadcastPool = ThreadPool(32)
 
 def broadcastToClient(client):
     global colors
