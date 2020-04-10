@@ -1,4 +1,5 @@
 import colorsys
+import time
 
 import mido
 
@@ -7,9 +8,11 @@ import notemap
 
 ctrl = controller.Controller("cloud.itsw.es", "password")
 
-with mido.open_input("vibrance", virtual=True) as inport:
+
+
+with mido.open_input("vibrance_loopback 3") as inport:
     for msg in inport:
-        print("msg", msg)
+        print(msg)
         if msg.type == "note_on":
             octNote = msg.note % 12
             octave = msg.note // 12
@@ -23,4 +26,10 @@ with mido.open_input("vibrance", virtual=True) as inport:
             for i, zone in enumerate(zones):
                 if zone:
                     ctrl.setColor(i+9001, color)
+                elif msg.velocity > 75:
+                    ctrl.setColor(i+9001, "000000")
+            print("Writing...", end="")
+            ts = time.time()
             ctrl.write()
+            print(int((time.time()-ts)*1000), "ms")
+            
