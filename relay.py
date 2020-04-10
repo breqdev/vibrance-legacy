@@ -15,7 +15,7 @@ key  = "../certs/privkey.pem"
 enable_ssl = True
 
 ports = list(range(9001, 9007))
-colors = {str(port): "000" for port in ports}
+messages = {}
 servers = []
 clients = []
 lastMessage = {}
@@ -126,12 +126,12 @@ def runBackgroundProcesses():
 broadcastPool = ThreadPool(32)
 
 def broadcastToClient(client):
-    global colors
+    global messages
     port = client.getsockname()[1]-100
     if str(port) not in colors:
         return # Selective Update
     try:
-        client.send(json.dumps(["#"+colors[str(port)], 0]).encode("utf-8"))
+        client.send(json.dumps(messages[str(port)]).encode("utf-8"))
     except Exception as e:
         print(f"Failed send to {port} client")
         traceback.print_exc()
@@ -237,7 +237,7 @@ def runCServer():
                 continue
             try:
                 line = data.decode().split("\n")[0]
-                colors = json.loads(line)
+                messages = json.loads(line)
             except Exception as e:
                 print("Unable to decode message")
                 traceback.print_exc()
