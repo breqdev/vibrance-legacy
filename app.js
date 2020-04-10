@@ -21,6 +21,7 @@ function runApp() {
         var decodedString = String.fromCharCode.apply(null,
                                                 new Uint8Array(event.data));
         var message = JSON.parse(decodedString);
+        console.log(message);
         var color = message["color"];
         var delay = message["delay"] | 0;
         var duration = message["duration"];
@@ -28,7 +29,7 @@ function runApp() {
 
         if (typeof color !== "undefined") {
             setTimeout(function(color) {
-                document.getElementById("screen").style.backgroundColor = color;
+                document.getElementById("screen").style.backgroundColor = "#"+color;
             }, delay, color);
 
             if (duration > 0) {
