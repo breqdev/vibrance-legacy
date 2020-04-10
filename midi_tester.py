@@ -1,18 +1,32 @@
 import colorsys
+import os
 
 import mido
 
-while True:
-    with mido.open_output("vibrance") as outport:
-        while True:
-            note = int(input("Note> "))
-            velocity = int(input("Vel> "))
+# Find Vibrance Port
+if os.name == "posix":
+    # macOS or Linux systems
+    # Just create a virtual port
+    outport = mido.open_output("vibrance",)
+elif os.name == "nt":
+    # Windows system
+    # Rely on external MIDI loopback software
+    outport = mido.open_output("vibrance_loopback 4")
+else:
+    raise ValueError("unsupported OS")
 
-            msg = mido.Message("note_on")
-            msg.note = note
-            msg.velocity = velocity
+try:
+    while True:
+        note = int(input("Note> "))
+        velocity = int(input("Vel> "))
 
-            if outport.closed:
-                break
+        msg = mido.Message("note_on")
+        msg.note = note
+        msg.velocity = velocity
 
-            outport.send(msg)
+        if outport.closed:
+            break
+
+        outport.send(msg)
+finally:
+    outport.close()

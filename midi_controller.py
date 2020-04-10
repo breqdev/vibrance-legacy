@@ -1,5 +1,6 @@
 import colorsys
 import time
+import os
 
 import mido
 
@@ -8,9 +9,19 @@ import notemap
 
 ctrl = controller.Controller("cloud.itsw.es", "password")
 
+# Find Vibrance Port
+if os.name == "posix":
+    # macOS or Linux systems
+    # Just create a virtual port
+    inport = mido.open_input("vibrance", virtual=True)
+elif os.name == "nt":
+    # Windows system
+    # Rely on external MIDI loopback software
+    inport = mido.open_input("vibrance_loopback 3")
+else:
+    raise ValueError("unsupported OS")
 
-
-with mido.open_input("vibrance", virtual=True) as inport:
+try:
     for msg in inport:
         print(msg)
         if msg.type == "note_on":
@@ -32,3 +43,5 @@ with mido.open_input("vibrance", virtual=True) as inport:
             ts = time.time()
             ctrl.write()
             print(int((time.time()-ts)*1000), "ms")
+finally:
+    inport.close()
