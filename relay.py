@@ -128,6 +128,8 @@ broadcastPool = ThreadPool(32)
 def broadcastToClient(client):
     global colors
     port = client.getsockname()[1]-100
+    if str(port) not in colors:
+        return # Selective Update
     try:
         client.send(json.dumps(["#"+colors[str(port)], 0]).encode("utf-8"))
     except Exception as e:
