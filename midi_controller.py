@@ -10,7 +10,7 @@ ctrl = controller.Controller("cloud.itsw.es", "password")
 
 
 
-with mido.open_input("vibrance_loopback 3") as inport:
+with mido.open_input("vibrance", virtual=True) as inport:
     for msg in inport:
         print(msg)
         if msg.type == "note_on":
@@ -32,4 +32,3 @@ with mido.open_input("vibrance_loopback 3") as inport:
             ts = time.time()
             ctrl.write()
             print(int((time.time()-ts)*1000), "ms")
-            

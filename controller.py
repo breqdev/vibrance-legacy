@@ -4,7 +4,7 @@ import ssl
 
 class Controller:
     def __init__(self, relay, password=None, enable_ssl=True):
-        self.colors = {port: "000" for port in range(9001, 9007)}
+        self.messages = {}
         self.relay = relay
         if enable_ssl:
             self.context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
@@ -23,9 +23,11 @@ class Controller:
                 raise ValueError("authentication failed")
 
     def setColor(self, port, color):
-        self.colors[port] = color
+        if port not in self.messages:
+            self.messages[port] = {}
+        self.messages[port]["color"] = color
 
     def write(self):
-        self.socket.send((json.dumps(self.colors)+"\n").encode("utf-8"))
-        self.colors = {}
+        self.socket.send((json.dumps(self.messages)+"\n").encode("utf-8"))
+        self.messages = {}
         return self.socket.recv(1024).decode("utf-8")

@@ -15,7 +15,7 @@ key  = "../certs/privkey.pem"
 enable_ssl = True
 
 ports = list(range(9001, 9007))
-colors = {str(port): "000" for port in ports}
+messages = {}
 servers = []
 clients = []
 lastMessage = {}
@@ -126,12 +126,12 @@ def runBackgroundProcesses():
 broadcastPool = ThreadPool(32)
 
 def broadcastToClient(client):
-    global colors
+    global messages
     port = client.getsockname()[1]-100
-    if str(port) not in colors:
+    if str(port) not in messages:
         return # Selective Update
     try:
-        client.send(json.dumps(["#"+colors[str(port)], 0]).encode("utf-8"))
+        client.send(json.dumps(messages[str(port)]).encode("utf-8"))
     except Exception as e:
         print(f"Failed send to {port} client")
         traceback.print_exc()
@@ -148,11 +148,13 @@ if enable_ssl:
     context.load_default_certs()
     context.load_cert_chain(cert, key)
     cserver_sock_unwrapped = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    cserver_sock_unwrapped.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     cserver_sock_unwrapped.bind(("0.0.0.0", 9100))
     cserver_sock_unwrapped.listen(16)
     cserver_sock = context.wrap_socket(cserver_sock_unwrapped, server_side=True)
 else:
     cserver_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    cserver_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     cserver_sock.bind(("0.0.0.0", 9100))
     cserver_sock.listen(16)
 
@@ -162,7 +164,7 @@ cclients_awaiting_auth = []
 PASSWORD = "password"
 
 def runCServer():
-    global colors
+    global messages
     while True:
         # New Clients
         read_server = select.select([cserver_sock], [], [], 0)[0]
@@ -237,12 +239,12 @@ def runCServer():
                 continue
             try:
                 line = data.decode().split("\n")[0]
-                colors = json.loads(line)
+                messages = json.loads(line)
             except Exception as e:
                 print("Unable to decode message")
                 traceback.print_exc()
             else:
-                print(colors)
+                print(messages)
                 broadcastToClients()
                 client.send(b"OK")
 
