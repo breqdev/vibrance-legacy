@@ -7,6 +7,7 @@ import json
 import threading
 import traceback
 import ssl
+import os
 from multiprocessing.dummy import Pool as ThreadPool
 
 cert = "secrets/fullchain.pem"
