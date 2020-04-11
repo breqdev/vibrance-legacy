@@ -9,8 +9,8 @@ import traceback
 import ssl
 from multiprocessing.dummy import Pool as ThreadPool
 
-cert = "../certs/fullchain.pem"
-key  = "../certs/privkey.pem"
+cert = "secrets/fullchain.pem"
+key  = "secrets/certs/privkey.pem"
 
 enable_ssl = True
 
