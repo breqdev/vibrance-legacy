@@ -2,7 +2,7 @@ import pygame
 import time
 import controller
 
-ctrl = controller.Controller("cloud.itsw.es", "password")
+ctrl = controller.Controller("cloud.itsw.es")
 
 pygame.init()
 

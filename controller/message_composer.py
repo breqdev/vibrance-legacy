@@ -1,7 +1,7 @@
 import controller
 import json
 
-ctrl = controller.Controller("cloud.itsw.es", "password")
+ctrl = controller.Controller("cloud.itsw.es")
 
 while True:
     i = input("Messages> ")

@@ -7,7 +7,7 @@ import mido
 import controller
 import notemap
 
-ctrl = controller.Controller("cloud.itsw.es", "password")
+ctrl = controller.Controller("cloud.itsw.es")
 
 # Find Vibrance Port
 if os.name == "posix":

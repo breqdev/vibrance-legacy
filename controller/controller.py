@@ -1,6 +1,7 @@
 import socket
 import json
 import ssl
+import os
 
 class Controller:
     def __init__(self, relay, password=None, enable_ssl=True):
@@ -14,6 +15,13 @@ class Controller:
         else:
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.connect((relay, 9100))
+
+        # If no password is specified, default to the one in secrets/psk.txt
+        if not password:
+            if os.path.exists("secrets/psk.txt"):
+                with open("secrets/psk.txt") as f:
+                    password = f.read().rstrip("\r\n")
+
         if password:
             self.socket.send(password.encode("utf-8"))
             ret = self.socket.recv(1024)

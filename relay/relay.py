@@ -161,7 +161,15 @@ else:
 cclients = []
 cclients_awaiting_auth = []
 
-PASSWORD = "password"
+if os.path.exists("secrets/psk.txt"):
+    with open("secrets/psk.txt") as f:
+        PASSWORD = f.read().rstrip("\r\n")
+else:
+    print("Warning: No password set")
+    print("Create the file ./secrets/psk.txt")
+    print("with the password for the controller interface")
+    print("(not doing this allows anyone to use this)")
+    print("Using default password `password`...")
 
 def runCServer():
     global messages

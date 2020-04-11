@@ -7,7 +7,7 @@ import mido
 if os.name == "posix":
     # macOS or Linux systems
     # Just create a virtual port
-    outport = mido.open_output("vibrance",)
+    outport = mido.open_output("vibrance")
 elif os.name == "nt":
     # Windows system
     # Rely on external MIDI loopback software
