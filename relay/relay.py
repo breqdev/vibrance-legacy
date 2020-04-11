@@ -10,7 +10,7 @@ import ssl
 from multiprocessing.dummy import Pool as ThreadPool
 
 cert = "secrets/fullchain.pem"
-key  = "secrets/certs/privkey.pem"
+key  = "secrets/privkey.pem"
 
 enable_ssl = True
 
