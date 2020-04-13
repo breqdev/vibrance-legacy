@@ -41,7 +41,7 @@ try:
                     ctrl.setColor(i+9001, "000000")
             print("Writing...", end="")
             ts = time.time()
-            ctrl.write()
+            print(ctrl.write())
             print(int((time.time()-ts)*1000), "ms")
 finally:
     inport.close()
