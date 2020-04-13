@@ -141,7 +141,7 @@ def broadcastToClient(client):
 def broadcastToClients():
     ts = time.time()
     broadcastPool.map(broadcastToClient, clients)
-    print(f"Broadcast update to {len(clients)} clients in {int((time.time()-ts)*1000)} ms")
+    return int((time.time()-ts)*1000)
 
 ### Command Server
 if enable_ssl:
@@ -254,8 +254,8 @@ def runCServer():
                 traceback.print_exc()
             else:
                 print(messages)
-                broadcastToClients()
-                client.send(b"OK")
+                latency = broadcastToClients()
+                client.send(json.dumps({"clients":len(clients), "latency":latency}).encode("utf-8"))
 
 
 

@@ -38,4 +38,4 @@ class Controller:
     def write(self):
         self.socket.send((json.dumps(self.messages)+"\n").encode("utf-8"))
         self.messages = {}
-        return self.socket.recv(1024).decode("utf-8")
+        return json.loads(self.socket.recv(1024).decode("utf-8"))
