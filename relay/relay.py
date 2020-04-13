@@ -76,7 +76,7 @@ def handleAcknowledgeLoop():
     while True:
         try:
             read_clients = select.select(clients, [], [], 0)[0]
-        except ValueError:
+        except OSError:
             continue
         for sock in read_clients:
             # New message from client
@@ -85,9 +85,8 @@ def handleAcknowledgeLoop():
                 if data:
                     # print(f"Received {message} from {sock.getpeername()}")
                     lastMessage[sock] = time.time()
-            except Exception as e:
+            except OSError:
                 print("Error receiving message, terminating client")
-                traceback.print_exc()
                 removeClient(sock)
 
 def handleCheckAliveLoop():
