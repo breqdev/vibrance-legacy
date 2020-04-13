@@ -11,6 +11,7 @@ function runApp() {
         function sendAcknowledges() {
             if (socket) {
                 socket.send("OK");
+                console.log("ACK sent")
                 setTimeout(sendAcknowledges, 1000);
             }
         }

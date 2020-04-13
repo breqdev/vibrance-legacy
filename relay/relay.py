@@ -58,6 +58,7 @@ def removeClient(client):
         pass
 
 def handleIncomingLoop():
+    global clients, servers, lastMessage
     print("Starting handle incoming connections thread")
     while True:
         read_servers = select.select(servers, [], [], 0)[0]
@@ -70,6 +71,7 @@ def handleIncomingLoop():
             print(f"New client from {addr} on port {port}")
 
 def handleAcknowledgeLoop():
+    global clients, lastMessage
     print("Starting handle acknowledge thread")
     while True:
         try:
@@ -89,6 +91,7 @@ def handleAcknowledgeLoop():
                 removeClient(sock)
 
 def handleCheckAliveLoop():
+    global clients, lastMessage
     print("Starting handle check alive thread")
     while True:
         for client in clients:
