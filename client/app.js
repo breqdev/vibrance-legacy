@@ -1,6 +1,14 @@
 const queryString = window.location.search;
 const urlParams = new URLSearchParams(queryString);
 
+function setColor(color) {
+    document.getElementById("screen").style.backgroundColor = "#"+color;
+    if (color === "000000" || color === "000") {
+        document.getElementById("status").style.color = "#FFF";
+    } else {
+        document.getElementById("status").style.color = "#000";
+    }
+}
 
 function runApp() {
     var socket = new WebSocket("wss://"+urlParams.get("host")+":"+urlParams.get("port"), "binary");
@@ -30,25 +38,15 @@ function runApp() {
         var motd = message["motd"];
 
         if (typeof color !== "undefined") {
-            setTimeout(function(color) {
-                document.getElementById("screen").style.backgroundColor = "#"+color;
-            }, delay, color);
+            setTimeout(setColor, delay, color);
 
             if (duration > 0) {
-                setTimeout(function() {
-                    document.getElementById("screen").style.backgroundColor = "#000";
-                }, delay+duration);
+                setTimeout(setColor, delay+duration, "000");
             }
         }
 
         if (typeof motd !== "undefined") {
             document.getElementById("status").innerText = motd;
-        }
-
-        if (color === "000000" || color === "000") {
-            document.getElementById("status").style.color = "#FFF";
-        } else {
-            document.getElementById("status").style.color = "#000";
         }
     }
 
