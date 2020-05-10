@@ -1,5 +1,6 @@
 import socket
 import json
+import time
 import ssl
 import os
 
@@ -36,6 +37,10 @@ class Controller:
         self.messages[port]["color"] = color
 
     def write(self):
+        timestamp = time.time()
         self.socket.send((json.dumps(self.messages)+"\n").encode("utf-8"))
         self.messages = {}
-        return json.loads(self.socket.recv(1024).decode("utf-8"))
+        stats = {}
+        stats["server"] = json.loads(self.socket.recv(1024).decode("utf-8"))
+        stats["controller"] = {"latency":int((time.time()-timestamp)*1000)}
+        return stats
