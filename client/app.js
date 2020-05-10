@@ -1,8 +1,9 @@
-var port = location.hash.substring(1);
+const queryString = window.location.search;
+const urlParams = new URLSearchParams(queryString);
 
 
 function runApp() {
-    var socket = new WebSocket("wss://cloud.itsw.es:"+port, "binary");
+    var socket = new WebSocket("wss://"+urlParams.get("host")+":"+urlParams.get("port"), "binary");
     socket.binaryType = "arraybuffer";
 
     socket.onopen = function(event) {
@@ -42,6 +43,12 @@ function runApp() {
 
         if (typeof motd !== "undefined") {
             document.getElementById("status").innerText = motd;
+        }
+
+        if (color === "000000" || color === "000") {
+            document.getElementById("status").style.color = "#FFF";
+        } else {
+            document.getElementById("status").style.color = "#000";
         }
     }
 

@@ -174,7 +174,7 @@ else:
     print("(not doing this allows anyone to use this)")
     print("Using default password `password`...")
 
-def runCServer():
+def runCommandServer():
     global messages
     while True:
         # New Clients
@@ -265,7 +265,7 @@ runBackgroundProcesses()
 
 while True:
     try:
-        runCServer()
+        runCommandServer()
     except Exception as e:
         print("Error in Command Server:")
         traceback.print_exc()
