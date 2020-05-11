@@ -13,15 +13,16 @@ def getColor(radians):
 frame = 0
 while True:
     ctrl.clear()
-    for i in range(2):
-        ctrl.add(9001, getColor(frame/5), delay=i*500)
-        ctrl.add(9002, getColor(frame/5+math.pi*1/3), delay=i*500)
-        ctrl.add(9003, getColor(frame/5+math.pi*2/3), delay=i*500)
-        ctrl.add(9004, getColor(frame/5+math.pi), delay=i*500)
-        ctrl.add(9005, getColor(frame/5+math.pi*4/3), delay=i*500)
-        ctrl.add(9006, getColor(frame/5+math.pi*5/3), delay=i*500)
+    for i in range(20):
+        ctrl.add(9001, getColor(frame/50), delay=i*50)
+        ctrl.add(9002, getColor(frame/50+math.pi*1/3), delay=i*50)
+        ctrl.add(9003, getColor(frame/50+math.pi*2/3), delay=i*50)
+        ctrl.add(9004, getColor(frame/50+math.pi), delay=i*50)
+        ctrl.add(9005, getColor(frame/50+math.pi*4/3), delay=i*50)
+        ctrl.add(9006, getColor(frame/50+math.pi*5/3), delay=i*50)
         frame += 1
     ts = time.time()
     print("Sending update... ")
+    print(len(str(ctrl.messages)))
     print(ctrl.write())
     time.sleep(1 + ts - time.time())
