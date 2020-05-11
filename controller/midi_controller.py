@@ -34,11 +34,12 @@ try:
             color = notemap.PALETTE[octNote]
             zones = notemap.ZONEMAP[octave]
 
+            ctrl.clear()
             for i, zone in enumerate(zones):
                 if zone:
-                    ctrl.setColor(i+9001, color)
+                    ctrl.add(i+9001, color)
                 elif msg.velocity > 75:
-                    ctrl.setColor(i+9001, "000000")
+                    ctrl.add(i+9001, "000000")
             print("Writing...", end="")
             ts = time.time()
             print(ctrl.write())

@@ -84,8 +84,9 @@ while running:
             updateNeeded = True
 
     if updateNeeded:
+        ctrl.clear()
         for port in colors.keys():
-            ctrl.setColor(port, colors[port])
+            ctrl.add(port, colors[port])
         ctrl.write()
         updateNeeded = False
     pygame.display.flip()
