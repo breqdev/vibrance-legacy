@@ -189,7 +189,7 @@ def runCommandServer():
         for client in read_clients_awaiting:
             print("New data from client awaiting auth")
             try:
-                data = client.recv(1024)
+                data = client.recv(2**18)
                 if len(data) == 0:
                     print("Socket closed")
                     cclients_awaiting_auth.remove(client)
