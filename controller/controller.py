@@ -32,9 +32,7 @@ class Controller:
                 raise ValueError("authentication failed")
 
     def setColor(self, port, color):
-        if port not in self.messages:
-            self.messages[port] = {}
-        self.messages[port]["color"] = color
+        self.messages[port] = [{"color":color}]
 
     def write(self):
         timestamp = time.time()

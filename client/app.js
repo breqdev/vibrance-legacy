@@ -30,24 +30,31 @@ function runApp() {
     socket.onmessage = function(event) {
         var decodedString = String.fromCharCode.apply(null,
                                                 new Uint8Array(event.data));
-        var message = JSON.parse(decodedString);
-        console.log(message);
-        var color = message["color"];
-        var delay = message["delay"] | 0;
-        var duration = message["duration"];
-        var motd = message["motd"];
+        var messages = JSON.parse(decodedString);
+        console.log(messages);
 
-        if (typeof color !== "undefined") {
-            setTimeout(setColor, delay, color);
+        messages.forEach(function(message, index) {
 
-            if (duration > 0) {
-                setTimeout(setColor, delay+duration, "000");
+            var color = message["color"];
+            var delay = message["delay"] | 0;
+            var duration = message["duration"];
+            var motd = message["motd"];
+
+            if (typeof color !== "undefined") {
+                setTimeout(setColor, delay, color);
+
+                if (duration > 0) {
+                    setTimeout(setColor, delay+duration, "000");
+                }
             }
-        }
 
-        if (typeof motd !== "undefined") {
-            document.getElementById("status").innerText = motd;
-        }
+            if (typeof motd !== "undefined") {
+                setTimeout(function(motd) {
+                    document.getElementById("status").innerText = motd;
+                }, delay, motd);
+            }
+
+        });
     }
 
     socket.onclose = function(event) {
