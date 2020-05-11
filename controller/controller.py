@@ -31,8 +31,24 @@ class Controller:
             else:
                 raise ValueError("authentication failed")
 
-    def setColor(self, port, color):
-        self.messages[port] = [{"color":color}]
+    def clear(self):
+        self.messages = {}
+
+    def add(self, port, color=None, delay=None, duration=None, motd=None):
+        if port not in self.messages:
+            self.messages[port] = []
+
+        message = {}
+        if color is not None:
+            message["color"] = color
+        if delay is not None:
+            message["delay"] = delay
+        if duration is not None:
+            message["duration"] = duration
+        if motd is not None:
+            message["motd"] = motd
+
+        self.messages[port].append(message)
 
     def write(self):
         timestamp = time.time()

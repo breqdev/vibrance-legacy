@@ -23,5 +23,6 @@ ctrl = controller.Controller(sys.argv[1])
 
 while True:
     i = input("Messages> ")
+    ctrl.clear()
     ctrl.messages = json.loads(i)
     print(ctrl.write())
