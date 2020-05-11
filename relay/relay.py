@@ -230,7 +230,7 @@ def runCommandServer():
         for client in read_clients:
             print("New data")
             try:
-                data = client.recv(1024)
+                data = client.recv(2**18)
                 if len(data) == 0:
                     print("Socket closed")
                     cclients.remove(client)
