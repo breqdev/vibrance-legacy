@@ -1,3 +1,4 @@
+import pathlib
 import socket
 import json
 import time
@@ -19,8 +20,10 @@ class Controller:
 
         # If no password is specified, default to the one in secrets/psk.txt
         if not password:
-            if os.path.exists("secrets/psk.txt"):
-                with open("secrets/psk.txt") as f:
+            password_path = (pathlib.Path(__file__).parent / "secrets/psk.txt").resolve()
+            print(password_path)
+            if os.path.exists(password_path):
+                with open(password_path) as f:
                     password = f.read().rstrip("\r\n")
 
         if password:

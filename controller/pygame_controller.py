@@ -1,7 +1,22 @@
 import pygame
 import time
 import controller
-import notemap
+
+PALETTE = (
+    "000000", # black
+    "FFFFFF", # white
+    "FF0000", # red
+    "00FF00", # green
+    "0000FF", # blue
+    "FFFF00", # yellow
+    "00FFFF", # cyan
+    "FF00FF", # magenta
+    "FF8000", # orange
+    "8000FF", # purple
+    "0080FF", # light blue
+    "FF0080", # pink
+)
+
 
 ctrl = controller.Controller("cloud.itsw.es")
 
@@ -11,7 +26,7 @@ screen = pygame.display.set_mode((1000, 500))
 pygame.display.set_caption("Vibrance Control")
 clock = pygame.time.Clock()
 
-color = notemap.PALETTE[0]
+color = PALETTE[0]
 
 running = True
 
@@ -55,29 +70,29 @@ while running:
                     enabled[9006] = True
             else:
                 if event.key == ord('q'):
-                    color = notemap.PALETTE[0]
+                    color = PALETTE[0]
                 elif event.key == ord('w'):
-                    color = notemap.PALETTE[1]
+                    color = PALETTE[1]
                 elif event.key == ord('e'):
-                    color = notemap.PALETTE[2]
+                    color = PALETTE[2]
                 elif event.key == ord('r'):
-                    color = notemap.PALETTE[3]
+                    color = PALETTE[3]
                 elif event.key == ord('a'):
-                    color = notemap.PALETTE[4]
+                    color = PALETTE[4]
                 elif event.key == ord('s'):
-                    color = notemap.PALETTE[5]
+                    color = PALETTE[5]
                 elif event.key == ord('d'):
-                    color = notemap.PALETTE[6]
+                    color = PALETTE[6]
                 elif event.key == ord('f'):
-                    color = notemap.PALETTE[7]
+                    color = PALETTE[7]
                 elif event.key == ord('z'):
-                    color = notemap.PALETTE[8]
+                    color = PALETTE[8]
                 elif event.key == ord('x'):
-                    color = notemap.PALETTE[9]
+                    color = PALETTE[9]
                 elif event.key == ord('c'):
-                    color = notemap.PALETTE[10]
+                    color = PALETTE[10]
                 elif event.key == ord('v'):
-                    color = notemap.PALETTE[11]
+                    color = PALETTE[11]
             updateNeeded = True
 
         elif event.type == pygame.KEYUP:

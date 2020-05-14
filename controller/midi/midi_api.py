@@ -3,7 +3,7 @@ import atexit
 
 import mido
 
-import controller
+from .. import controller
 
 class NoUpdate:
     pass
